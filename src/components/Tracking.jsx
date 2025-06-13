@@ -20,7 +20,7 @@ const Tracking = () => {
     if (!pickup || !drop) return;
 
     const steps = 100;
-    const interval = 100; // ms
+    const interval = 100; 
     const latStep = (drop.lat - pickup.lat) / steps;
     const lngStep = (drop.lng - pickup.lng) / steps;
 
@@ -32,7 +32,6 @@ const Tracking = () => {
         clearInterval(intervalId);
         const endedAt = new Date().toISOString();
 
-        // Save to past travels
         const past = JSON.parse(localStorage.getItem('pastTravels') || '[]');
         past.push({
           pickup,

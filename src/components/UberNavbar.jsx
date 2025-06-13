@@ -6,7 +6,6 @@ const UberNavbar = () => {
     <nav className="navbar navbar-expand-lg navbar-dark bg-black shadow-sm p-2 px-5">
       <div className="nav w-100 d-flex justify-content-between align-items-center">
 
-        {/* Left side: Uber, Ride, Drive */}
         <div className="d-flex align-items-center gap-4">
           <Link className="navbar-brand mb-0" to="/">
             <h4 className="text-white mb-0">Uber</h4>
@@ -21,7 +20,6 @@ const UberNavbar = () => {
           </ul>
         </div>
 
-        {/* Right side: Login */}
         <ul className="navbar-nav">
           <li className="nav-item">
             <Link className="nav-link text-white" to="/booking">Booking</Link>

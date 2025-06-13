@@ -6,7 +6,6 @@ const UberFooter = () => {
       <div className="container">
         <div className="row">
 
-          {/* Column 1: Company */}
           <div className="col-sm-6 col-md-3 mb-4">
             <h6 className="fw-bold mb-3">Company</h6>
             <ul className="list-unstyled small">
@@ -19,7 +18,6 @@ const UberFooter = () => {
             </ul>
           </div>
 
-          {/* Column 2: Products */}
           <div className="col-sm-6 col-md-3 mb-4">
             <h6 className="fw-bold mb-3">Products</h6>
             <ul className="list-unstyled  small">
@@ -33,7 +31,6 @@ const UberFooter = () => {
             </ul>
           </div>
 
-          {/* Column 3: Global Citizenship */}
           <div className="col-sm-6 col-md-3 mb-4">
             <h6 className="fw-bold mb-3">Global citizenship</h6>
             <ul className="list-unstyled  small">
@@ -47,14 +44,11 @@ const UberFooter = () => {
               <li>Cities</li>
             </ul>
           </div>
-
-          {/* Column 4: Contact + Social */}
           <div className="col-sm-6 col-md-3 mb-4">
             <h6 className="fw-bold mb-3">Connect</h6>
             <p className=" small mb-1">Uber Clone Inc.</p>
             <p className="small mb-2">Hyderabad, India</p>
 
-            {/* Social icons */}
             <div className="d-flex gap-3">
               <a href="#" className="text-white"><i className="bi bi-facebook"></i></a>
               <a href="#" className="text-white"><i className="bi bi-twitter"></i></a>

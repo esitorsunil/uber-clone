@@ -2,5 +2,26 @@
   margin: 0 230px;
 }
 
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  color: black;
+  font-size: 1rem;
+}
 
+.input-hover-border {
+  transition: border-color 0.2s;
+}
+
+.input-hover-border:hover {
+  border-color: black !important;
+}
+
+.input-hover-border:focus {
+  border-color: black !important;
+  box-shadow: none !important; 
+  outline: none !important;     
+}
 

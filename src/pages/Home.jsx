@@ -36,10 +36,10 @@ const serviceData = [
 ];
 
 const Home = () => {
-   const navigate = useNavigate(); // ✅ Hook for navigation
+   const navigate = useNavigate(); 
 
   const handleBookRide = () => {
-    navigate('/ride'); // 🔁 Navigate to your ride booking page
+    navigate('/ride'); 
   };
   return (
     <>

@@ -1,29 +1,30 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
-// Fix Leaflet default icon paths
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+const icon = new L.DivIcon({
+  html: '<i class="bi bi-geo-alt-fill text-dark fs-3"></i>',
+  iconSize: [30, 42],
+  className: 'd-flex justify-content-center align-items-center',
 });
 
-// 🚴 Custom bike icon
-const bikeIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/1147/1147935.png',
-  iconSize: [40, 40],
-  iconAnchor: [20, 40],
-  popupAnchor: [0, -40],
-});
+const FitMapBounds = ({ pickup, drop }) => {
+  const map = useMap();
+  if (pickup && drop) {
+    map.fitBounds([
+      [pickup.lat, pickup.lng],
+      [drop.lat, drop.lng],
+    ]);
+  }
+  return null;
+};
 
 const DriverAccept = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { pickup, drop, fare } = state || {};
+  const { pickup, drop, fare, distance } = state || {};
 
   const handleConfirmRide = () => {
     navigate('/tracking', {
@@ -36,60 +37,56 @@ const DriverAccept = () => {
   }
 
   return (
-    <div className="container py-4">
-      <h2 className="mb-4 text-center text-primary">New Ride Request</h2>
-
-      <div className="row">
-        {/* Ride Details Card */}
-        <div className="col-md-5 mb-4">
-          <div className="card shadow-sm border-0">
-            <div className="card-body">
-              <h5 className="card-title mb-4">📍 Ride Details</h5>
-
-              <p className="mb-3">
-                <i className="bi bi-geo-alt-fill text-success me-2"></i>
-                <strong>Pickup:</strong>
-                <br />
-                <span className="text-muted">{pickup.address}</span>
-              </p>
-
-              <p className="mb-3">
-                <i className="bi bi-flag-fill text-danger me-2"></i>
-                <strong>Drop:</strong>
-                <br />
-                <span className="text-muted">{drop.address}</span>
-              </p>
-
-              <p className="mb-3">
-                <i className="bi bi-cash-coin text-warning me-2"></i>
-                <strong>Fare:</strong> ₹{fare}
-              </p>
-
-              <button className="btn btn-success w-100 mt-3" onClick={handleConfirmRide}>
-                <i className="bi bi-check-circle-fill me-2"></i>
-                Confirm Ride
-              </button>
-            </div>
-          </div>
+    <div className="d-flex justify-content-center align-items-center bg-light" style={{ minHeight: '100vh' }}>
+      <div className="card shadow-lg p-4" style={{ maxWidth: '750px', width: '100%' }}>
+  
+        <div className="rounded mb-4 overflow-hidden border" style={{ height: '250px' }}>
+          <MapContainer center={[pickup.lat, pickup.lng]} zoom={13} style={{ height: '100%', width: '100%' }}>
+            <TileLayer
+              attribution='&copy; OpenStreetMap contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={[pickup.lat, pickup.lng]} icon={icon} />
+            <Marker position={[drop.lat, drop.lng]} icon={icon} />
+            <Polyline positions={[[pickup.lat, pickup.lng], [drop.lat, drop.lng]]} color="black" />
+            <FitMapBounds pickup={pickup} drop={drop} />
+          </MapContainer>
         </div>
 
-        {/* Map Section */}
-        <div className="col-md-7">
-          <div className="rounded shadow-sm overflow-hidden" style={{ height: '400px' }}>
-            <MapContainer
-              center={[pickup.lat, pickup.lng]}
-              zoom={13}
-              style={{ height: '100%', width: '100%' }}
-            >
-              <TileLayer
-                attribution='&copy; OpenStreetMap contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <Marker position={[pickup.lat, pickup.lng]} icon={bikeIcon} />
-              <Marker position={[drop.lat, drop.lng]} />
-              <Polyline positions={[[pickup.lat, pickup.lng], [drop.lat, drop.lng]]} color="blue" />
-            </MapContainer>
+        <div className="mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h5 className="mb-1 fw-semibold">
+                <i className="bi bi-person-fill me-2" /> Uber Moto
+              </h5>
+              <small className="text-muted">Confirm ride details</small>
+            </div>
+            <div className="text-end">
+              <h4 className="fw-bold text-success mb-1">₹{fare}</h4>
+              <small className="text-muted">{distance} km</small>
+            </div>
           </div>
+
+          <div className="mb-3">
+            <div className="d-flex align-items-start mb-3">
+           <i class="bi bi-geo-alt-fill me-2"></i>
+              <div>
+                <small className="text-muted">Pickup</small>
+                <div className="fw-medium">{pickup.address}</div>
+              </div>
+            </div>
+            <div className="d-flex align-items-start">
+              <i class="bi bi-geo-alt-fill me-2"></i>
+              <div>
+                <small className="text-muted">Drop</small>
+                <div className="fw-medium">{drop.address}</div>
+              </div>
+            </div>
+          </div>
+
+          <button className="btn btn-secondary w-100 rounded-pill py-2" onClick={handleConfirmRide}>
+            Confirm Ride
+          </button>
         </div>
       </div>
     </div>
