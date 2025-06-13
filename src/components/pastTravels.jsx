@@ -28,14 +28,14 @@ const PastTravels = () => {
                 <div>
                   <div className="text-muted small">{rideDate} • {rideTime}</div>
 
-                  <div className="mt-2">
+                  <div className="mt-3">
                     <div className="d-flex align-items-start mb-1">
-                      <i className="bi bi-circle-fill text-success me-2 mt-1" />
+                      <i className="bi bi-circle-fill text-secondary me-2" />
                       <div>{ride.pickup.address}</div>
                     </div>
 
                     <div className="d-flex align-items-start">
-                      <i className="bi bi-square-fill text-danger me-2 mt-1" />
+                      <i className="bi bi-square-fill text-secondary me-2 " />
                       <div>{ride.drop.address}</div>
                     </div>
                   </div>
