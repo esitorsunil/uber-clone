@@ -4,6 +4,7 @@ import rideReducer from './rideSlice';
 const store = configureStore({
   reducer: {
     ride: rideReducer,
+  
   },
 });
 

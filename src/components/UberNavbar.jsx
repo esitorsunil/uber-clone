@@ -1,9 +1,8 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
 import LogoutButton from './Logout';
 
 const UberNavbar = () => {
-  const currentUser = JSON.parse(localStorage.getItem('user')); // ⬅️ use the correct key you set in Login
+  const currentUser = JSON.parse(localStorage.getItem('user')); 
   const role = currentUser?.role;
 
   const linkPath = role === 'admin' ? '/admin' : '/user';

@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { completeRideByUser } from '../utils/redux/rideSlice'; 
 
 const RideTable = ({
   rides,
@@ -7,9 +9,10 @@ const RideTable = ({
   onAccept,
   onEdit,
   onDelete,
-  onView, // NEW PROP
+  onView, 
 }) => {
   const [elapsedTimes, setElapsedTimes] = useState({});
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -45,24 +48,33 @@ const RideTable = ({
     zIndex: 1,
   });
 
+  const onComplete = (ride) => {
+    dispatch(
+      completeRideByUser({
+        rideId: ride.id,
+        username: currentUser.username,
+      })
+    );
+  };
+
   return (
     <div className="scroll-container" style={{ overflowX: 'auto' }}>
       <table className="table align-middle table-hover mt-3" style={{ minWidth: '1800px' }}>
         <thead className="bg-light">
           <tr className="align-middle border-bottom text-secondary">
-    <th style={{ ...stickyStyle(0), width: '150px' }} className="py-3 px-3">Ride ID</th>
-    <th style={{ ...stickyStyle(150), width: '300px' }} className="py-3 px-3">Pickup</th>
-    <th className="py-3 px-3">Drop</th>
-    <th className="py-3 px-3">Distance (km)</th>
-    <th className="py-3 px-3">Fare</th>
-    <th className="py-3 px-3">Assigned To</th>
-    <th className="py-3 px-3">Status</th>
-    <th className="py-3 px-3">Start Date</th>
-    <th className="py-3 px-3">Start Time</th>
-    <th className="py-3 px-3">Timer</th>
-    <th className="py-3 px-3">View</th>
-    <th className="py-3 px-3 text-end">{isUserView ? 'Action' : 'Actions'}</th>
-  </tr>
+            <th style={{ ...stickyStyle(0), width: '150px' }} className="py-3 px-3">Ride ID</th>
+            <th style={{ ...stickyStyle(150), width: '300px' }} className="py-3 px-3">Pickup</th>
+            <th className="py-3 px-3">Drop</th>
+            <th className="py-3 px-3">Distance (km)</th>
+            <th className="py-3 px-3">Fare</th>
+            <th className="py-3 px-3">Assigned To</th>
+            <th className="py-3 px-3">Status</th>
+            <th className="py-3 px-3">Start Date</th>
+            <th className="py-3 px-3">Start Time</th>
+            <th className="py-3 px-3">Timer</th>
+            <th className="py-3 px-3">View</th>
+            <th className="py-3 px-3 text-end">{isUserView ? 'Action' : 'Actions'}</th>
+          </tr>
         </thead>
         <tbody>
           {rides
@@ -106,9 +118,7 @@ const RideTable = ({
                   <td className="py-3 px-3">
                     {ongoingUser?.username || 'Unassigned'}
                   </td>
-                  <td className="py-3 px-3">
-                    {ride.status || 'pending'}
-                  </td>
+                  <td className="py-3 px-3">{ride.status || 'pending'}</td>
                   <td className="py-3 px-3">{startDateStr}</td>
                   <td className="py-3 px-3">{startTimeStr}</td>
                   <td className="py-3 px-3">
@@ -139,14 +149,24 @@ const RideTable = ({
                         </button>
                       </>
                     ) : (
-                      canAccept && (
-                        <button
-                          className="btn btn-sm btn-success"
-                          onClick={() => onAccept?.(ride)}
-                        >
-                          <i className="bi bi-check-circle me-1"></i> Accept
-                        </button>
-                      )
+                      <>
+                        {canAccept && (
+                          <button
+                            className="btn btn-sm btn-success me-2"
+                            onClick={() => onAccept?.(ride)}
+                          >
+                            <i className="bi bi-check-circle me-1"></i> Accept
+                          </button>
+                        )}
+                        {employeeStatus?.status === 'ongoing' && (
+                          <button
+                            className="btn btn-sm btn-warning"
+                            onClick={() => onComplete(ride)}
+                          >
+                            <i className="bi bi-flag-fill me-1"></i> Complete
+                          </button>
+                        )}
+                      </>
                     )}
                   </td>
                 </tr>

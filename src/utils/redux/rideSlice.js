@@ -48,32 +48,55 @@ const rideSlice = createSlice({
       saveTimesheets(state.timesheets);
     },
 
-   acceptRideByUser: (state, action) => {
-  const { rideId, username, startTime } = action.payload;
+    acceptRideByUser: (state, action) => {
+      const { rideId, username, startTime } = action.payload;
 
-  state.rides = state.rides.map((ride) => {
-    if (ride.id === rideId) {
-      const updatedRide = {
-        ...ride,
-        status: 'ongoing',
-        assignedTo: username,
-        assignedUsers: [
-          ...(ride.assignedUsers || []),
-          { username, startTime, status: 'ongoing' },
-        ],
-      };
+      state.rides = state.rides.map((ride) => {
+        if (ride.id === rideId) {
+          const updatedRide = {
+            ...ride,
+            status: 'ongoing',
+            assignedTo: username,
+            assignedUsers: [
+              ...(ride.assignedUsers || []),
+              { username, startTime, status: 'ongoing' },
+            ],
+          };
+          return updatedRide;
+        }
+        return ride;
+      });
 
-      return updatedRide;
-    }
-    return ride;
-  });
+      saveRides(state.rides);
+    },
 
-  localStorage.setItem('adminRides', JSON.stringify(state.rides));
-},
+    completeRideByUser: (state, action) => {
+      const { rideId, username } = action.payload;
 
+      state.rides = state.rides.map((ride) => {
+        if (ride.id === rideId) {
+          const updatedAssignedUsers = ride.assignedUsers.map((user) =>
+            user.username === username
+              ? {
+                  ...user,
+                  status: 'completed',
+                  endTime: new Date().toISOString(),
+                }
+              : user
+          );
 
+          return {
+            ...ride,
+            status: 'completed',
+            assignedUsers: updatedAssignedUsers,
+          };
+        }
+        return ride;
+      });
 
-    // ✅ Track timesheet entries per employee
+      saveRides(state.rides);
+    },
+
     addTimesheetEntry: (state, action) => {
       const { rideId, username, location } = action.payload;
       const ride = state.rides.find((r) => r.id === rideId);
@@ -100,6 +123,7 @@ export const {
   updateRideStatus,
   logTimesheet,
   acceptRideByUser,
+  completeRideByUser,
   addTimesheetEntry,
 } = rideSlice.actions;
 
