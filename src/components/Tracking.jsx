@@ -1,72 +1,109 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const bikeIcon = new L.Icon({
-  iconUrl: 'https://cdn-icons-png.flaticon.com/512/8830/8830649.png',
+  iconUrl: 'https://img.icons8.com/ios/50/marker--v1.png',
   iconSize: [40, 40],
   iconAnchor: [20, 40],
 });
 
+const icon = new L.DivIcon({
+  html: '<i class="bi bi-geo-alt-fill text-dark fs-3"></i>',
+  iconSize: [30, 42],
+  className: 'd-flex justify-content-center align-items-center',
+});
+
+const FitMapBounds = ({ pickup, drop }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (pickup && drop) {
+      map.fitBounds([
+        [pickup.lat, pickup.lng],
+        [drop.lat, drop.lng],
+      ]);
+    }
+  }, [pickup, drop, map]);
+
+  return null;
+};
+
 const Tracking = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
-  const { pickup, drop } = state || {};
-  const [position, setPosition] = useState(pickup);
+  const { pickup, drop, routeCoordinates, fare } = state || {};
 
-  useEffect(() => {
-    if (!pickup || !drop) return;
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const hasSavedRide = useRef(false); // ✅ Add this at the top inside Tracking component
 
-    const steps = 100;
-    const interval = 100; 
-    const latStep = (drop.lat - pickup.lat) / steps;
-    const lngStep = (drop.lng - pickup.lng) / steps;
 
-    let currentStep = 0;
-    const startedAt = new Date().toISOString();
+useEffect(() => {
+  if (!pickup || !drop || !routeCoordinates?.length || hasSavedRide.current) return;
 
-    const intervalId = setInterval(() => {
-      if (currentStep >= steps) {
-        clearInterval(intervalId);
-        const endedAt = new Date().toISOString();
+  const startedAt = new Date().toISOString();
 
-        const past = JSON.parse(localStorage.getItem('pastTravels') || '[]');
-        past.push({
-          pickup,
-          drop,
-          fare: Math.floor(Math.random() * 200) + 100,
-          startedAt,
-          endedAt,
-          status: 'completed',
-        });
-        localStorage.setItem('pastTravels', JSON.stringify(past));
+  const interval = setInterval(() => {
+    setCurrentIndex((prevIndex) => {
+      const nextIndex = prevIndex + 1;
 
-        navigate('/past-travels');
-        return;
+      if (nextIndex >= routeCoordinates.length) {
+        clearInterval(interval);
+
+        if (!hasSavedRide.current) {
+          const endedAt = new Date().toISOString();
+          const past = JSON.parse(localStorage.getItem('pastTravels') || '[]');
+
+          past.push({
+            pickup,
+            drop,
+            fare,
+            startedAt,
+            endedAt,
+            status: 'completed',
+          });
+
+          localStorage.setItem('pastTravels', JSON.stringify(past));
+          hasSavedRide.current = true; // ✅ mark as saved
+          navigate('/past-travels');
+        }
+
+        return prevIndex;
       }
 
-      setPosition(prev => ({
-        lat: prev.lat + latStep,
-        lng: prev.lng + lngStep,
-      }));
+      return nextIndex;
+    });
+  }, 100);
 
-      currentStep++;
-    }, interval);
-  }, [pickup, drop, navigate]);
+  return () => clearInterval(interval);
+}, [pickup, drop, routeCoordinates, navigate, fare]);
 
-  if (!pickup || !drop) return <div className="p-4 text-danger">❌ Invalid ride</div>;
+
+  if (!pickup || !drop || !routeCoordinates?.length) {
+    return <div className="p-4 text-danger">❌ Invalid tracking data</div>;
+  }
+
+  const currentPosition = routeCoordinates[currentIndex] || routeCoordinates[0];
 
   return (
     <div className="container py-4">
-      <h3 className="text-center text-info">🛵 Ride in Progress...</h3>
-      <MapContainer center={[pickup.lat, pickup.lng]} zoom={13} style={{ height: '400px', width: '100%' }}>
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-        <Marker position={[pickup.lat, pickup.lng]} />
-        <Marker position={[drop.lat, drop.lng]} />
-        <Polyline positions={[[pickup.lat, pickup.lng], [drop.lat, drop.lng]]} color="blue" />
-        <Marker position={[position.lat, position.lng]} icon={bikeIcon} />
+      <h3 className="text-center text-primary">🛵 Ride in Progress</h3>
+      <MapContainer
+        center={[pickup.lat, pickup.lng]}
+        zoom={13}
+        style={{ height: '400px', width: '100%' }}
+        className="rounded shadow-sm border"
+      >
+        <TileLayer
+          attribution='&copy; OpenStreetMap contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Marker position={[pickup.lat, pickup.lng]} icon={icon} />
+        <Marker position={[drop.lat, drop.lng]} icon={icon} />
+        <Polyline positions={routeCoordinates} color="blue" />
+        <Marker position={currentPosition} icon={bikeIcon} />
+        <FitMapBounds pickup={pickup} drop={drop} />
       </MapContainer>
     </div>
   );

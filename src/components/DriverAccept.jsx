@@ -24,11 +24,14 @@ const FitMapBounds = ({ pickup, drop }) => {
 const DriverAccept = () => {
   const navigate = useNavigate();
   const { state } = useLocation();
-  const { pickup, drop, fare, distance } = state || {};
+  const { pickup, drop, distance, routeCoordinates, fare } = state || {};
+
+  // ✅ Generate fare only once
+
 
   const handleConfirmRide = () => {
     navigate('/tracking', {
-      state: { pickup, drop },
+      state: { pickup, drop, fare, routeCoordinates, },
     });
   };
 
@@ -39,7 +42,6 @@ const DriverAccept = () => {
   return (
     <div className="d-flex justify-content-center align-items-center bg-light" style={{ minHeight: '100vh' }}>
       <div className="card shadow-lg p-4" style={{ maxWidth: '750px', width: '100%' }}>
-  
         <div className="rounded mb-4 overflow-hidden border" style={{ height: '250px' }}>
           <MapContainer center={[pickup.lat, pickup.lng]} zoom={13} style={{ height: '100%', width: '100%' }}>
             <TileLayer
@@ -48,7 +50,7 @@ const DriverAccept = () => {
             />
             <Marker position={[pickup.lat, pickup.lng]} icon={icon} />
             <Marker position={[drop.lat, drop.lng]} icon={icon} />
-            <Polyline positions={[[pickup.lat, pickup.lng], [drop.lat, drop.lng]]} color="black" />
+            {routeCoordinates?.length > 0 && <Polyline positions={routeCoordinates} color="blue" />}
             <FitMapBounds pickup={pickup} drop={drop} />
           </MapContainer>
         </div>
@@ -69,14 +71,14 @@ const DriverAccept = () => {
 
           <div className="mb-3">
             <div className="d-flex align-items-start mb-3">
-           <i class="bi bi-geo-alt-fill me-2"></i>
+              <i className="bi bi-geo-alt-fill me-2"></i>
               <div>
                 <small className="text-muted">Pickup</small>
                 <div className="fw-medium">{pickup.address}</div>
               </div>
             </div>
             <div className="d-flex align-items-start">
-              <i class="bi bi-geo-alt-fill me-2"></i>
+              <i className="bi bi-geo-alt-fill me-2"></i>
               <div>
                 <small className="text-muted">Drop</small>
                 <div className="fw-medium">{drop.address}</div>

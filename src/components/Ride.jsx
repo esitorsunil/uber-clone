@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Polyline, useMap } from 'react-leaflet';
 import axios from 'axios';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
+// Fix Leaflet icon URLs
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -35,8 +36,10 @@ const Ride = () => {
   const [activeField, setActiveField] = useState(null);
   const [distance, setDistance] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
+  
 
-  const apiKey = '8bcd7116590c479584b6e2d0a68c20c2'; // Replace with your own Geoapify key
+  const geoapifyKey = '8bcd7116590c479584b6e2d0a68c20c2';
+  const orsApiKey = '5b3ce3597851110001cf6248d316723f3f6540ec9d3b4e341a5f563f';
 
   const fetchSuggestions = async (query) => {
     if (!query) return;
@@ -46,7 +49,7 @@ const Ride = () => {
           text: query,
           filter: 'countrycode:in',
           format: 'json',
-          apiKey,
+          apiKey: geoapifyKey,
         },
       });
       setSuggestions(res.data.results.slice(0, 5));
@@ -82,15 +85,18 @@ const Ride = () => {
               lat: latitude,
               lon: longitude,
               format: 'json',
-              apiKey,
+              apiKey: geoapifyKey,
             },
           });
           const place = res.data.results[0];
-          handleSelectLocation({
-            lat: place.lat,
-            lon: place.lon,
-            formatted: place.formatted,
-          }, 'pickup');
+          handleSelectLocation(
+            {
+              lat: place.lat,
+              lon: place.lon,
+              formatted: place.formatted,
+            },
+            'pickup'
+          );
         } catch (err) {
           console.error('Reverse geocoding error:', err);
         }
@@ -99,30 +105,40 @@ const Ride = () => {
   };
 
   useEffect(() => {
-    const fetchDistance = async () => {
-      if (!pickup || !drop) return;
+    if (!pickup || !drop) return;
+
+    const fetchORSRoute = async () => {
+      const url = 'https://api.openrouteservice.org/v2/directions/driving-car/geojson';
 
       try {
-        const res = await axios.get('https://api.geoapify.com/v1/routing', {
-          params: {
-            waypoints: `${pickup.lat},${pickup.lng}|${drop.lat},${drop.lng}`,
-            mode: 'drive',
-            apiKey,
+        const res = await axios.post(
+          url,
+          {
+            coordinates: [
+              [pickup.lng, pickup.lat],
+              [drop.lng, drop.lat],
+            ],
           },
-        });
+          {
+            headers: {
+              Authorization: orsApiKey,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
 
         const feature = res.data.features[0];
-
-        const distanceInKm = feature.properties.distance / 1000;
+        const distanceInKm = feature.properties.summary.distance / 1000;
         setDistance(distanceInKm.toFixed(2));
 
         const coords = feature.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
         setRouteCoordinates(coords);
       } catch (err) {
-        console.error('Routing API error:', err);
+        console.error('ORS Routing API error:', err);
       }
     };
-    fetchDistance();
+
+    fetchORSRoute();
   }, [pickup, drop]);
 
   const handleSubmit = () => {
@@ -133,6 +149,7 @@ const Ride = () => {
           drop,
           fare: Math.round(distance * 10),
           distance,
+          routeCoordinates,
         },
       });
     }
@@ -222,7 +239,7 @@ const Ride = () => {
 
         <div className="col-md-8">
           <MapContainer
-            center={[17.385044, 78.486671]} 
+            center={[17.385044, 78.486671]}
             zoom={13}
             scrollWheelZoom
             style={{ height: '850px', width: '100%' }}

@@ -22,7 +22,7 @@ const UberNavbar = () => {
 
         <ul className="navbar-nav">
           <li className="nav-item">
-            <Link className="nav-link text-white" to="/booking">Booking</Link>
+            <Link className="nav-link text-white" to="/past-travels">Booking</Link>
           </li>
         </ul>
 
