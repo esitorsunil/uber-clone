@@ -1,26 +1,38 @@
+// App.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import UberNavbar from './components/UberNavbar';
-import Home from './pages/Home';
-import DriverAccept from './components/DriverAccept';
-import Tracking from './components/Tracking';
-import PastTravels from './components/pastTravels';
-import Ride from './components/Ride';
+import Login from './components/Login';
+import AdminView from './components/AdminView';
+import ProtectedRoute from './Route/ProtectedRoute';
+import UserView from './components/UserView';
 
 const App = () => {
   return (
     <Router>
       <UberNavbar />
-      
+
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/ride" element={<Ride/>} />
-        <Route path="/drive" element={<div className="p-5">🛣️ Activity</div>} />
-        <Route path="/driver-accept" element={<DriverAccept/>}/>
-        <Route path="/tracking" element={<Tracking/>}/>
-        <Route path="/past-travels" element={<PastTravels/>}/>
+        <Route path="/login" element={<Login />} />
+       
+       <Route
+  path="/user"
+  element={
+    <ProtectedRoute allowedRoles={['employee']}>
+      <UserView />
+    </ProtectedRoute>
+  }
+/>
+        
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminView />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
-    
     </Router>
   );
 };

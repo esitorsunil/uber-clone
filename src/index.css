@@ -25,3 +25,10 @@
   outline: none !important;     
 }
 
+.scroll-container {
+  overflow-x: auto;
+}
+
+.scroll-container table {
+  min-width: 1200px;
+}
