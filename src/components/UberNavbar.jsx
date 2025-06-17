@@ -13,7 +13,11 @@ const UberNavbar = () => {
       <div className="nav w-100 d-flex justify-content-between align-items-center">
         <div className="d-flex align-items-center gap-4">
           <Link className="navbar-brand mb-0" to={linkPath}>
-            <h4 className="text-white mb-0">{displayName} Panel</h4>
+            <img
+              src="https://www.pranathiss.com/static/assets/images/pranathiss-white.webp"
+              alt={`${displayName} Logo`}
+              style={{ height: '40px', objectFit: 'contain' , color: "white" }}
+            />
           </Link>
         </div>
 

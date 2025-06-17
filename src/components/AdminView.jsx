@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { users } from '../utils/user';
 import RideDialog from './RideDialogBox';
-import RideMapView from './RideMapView'; // NEW
+import RideMapView from './RideMapView';
 import { addRide, updateRide, deleteRide } from '../utils/redux/rideSlice';
 import RideTable from './RideTable';
 
@@ -11,7 +11,7 @@ const AdminView = ({ isUserView = false }) => {
   const dispatch = useDispatch();
   const [showDialog, setShowDialog] = useState(false);
   const [editingRide, setEditingRide] = useState(null);
-  const [viewRide, setViewRide] = useState(null); // NEW
+  const [viewRide, setViewRide] = useState(null); 
 
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
@@ -68,11 +68,10 @@ const AdminView = ({ isUserView = false }) => {
           isUserView={isUserView}
           onEdit={handleEditRide}
           onDelete={handleDelete}
-          onView={(ride) => setViewRide(ride)} // NEW
+          onView={(ride) => setViewRide(ride)}
         />
       )}
 
-      {/* Dialog for Assign/Edit */}
       {!isUserView && showDialog && (
         <RideDialog
           onClose={() => {
@@ -85,7 +84,6 @@ const AdminView = ({ isUserView = false }) => {
         />
       )}
 
-      {/* View Ride Modal */}
       {viewRide && (
         <>
           <div className="modal fade show d-block" tabIndex="-1" role="dialog">
