@@ -74,7 +74,6 @@ const AdminView = ({ isUserView = false }) => {
         />
       )}
 
-      {/* Ride Dialog Box */}
       {!isUserView && showDialog && (
         <RideDialog
           onClose={() => {
@@ -87,7 +86,6 @@ const AdminView = ({ isUserView = false }) => {
         />
       )}
 
-      {/* Ride Map Modal */}
       {viewRide && (
         <>
           <div className="modal fade show d-block" tabIndex="-1" role="dialog">

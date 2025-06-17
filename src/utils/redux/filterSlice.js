@@ -13,7 +13,7 @@ const filterSlice = createSlice({
       state.status = action.payload;
     },
     setUserFilter: (state, action) => {
-      state.users = action.payload; // array of usernames
+      state.users = action.payload; 
     },
     resetFilters: (state) => {
       state.status = 'all';

@@ -11,8 +11,7 @@ const App = () => {
       <UberNavbar />
 
       <Routes>
-        <Route path="/login" element={<Login />} />
-       
+        <Route path="/login" element={<Login />} />     
        <Route
   path="/user"
   element={

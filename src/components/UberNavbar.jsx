@@ -28,7 +28,7 @@ const UberNavbar = () => {
   return (
     <nav className="navbar navbar-dark bg-black shadow-sm px-3 py-2">
       <div className="container-fluid d-flex justify-content-between align-items-center flex-nowrap">
-        {/* Logo */}
+
         <Link className="navbar-brand" to={linkPath}>
           <img
             src="https://www.pranathiss.com/static/assets/images/pranathiss-white.webp"
@@ -37,7 +37,6 @@ const UberNavbar = () => {
           />
         </Link>
 
-        {/* Username & Logout */}
         <div className="d-flex align-items-center gap-2 text-white small flex-shrink-0">
           <span className="d-none d-sm-inline">Welcome, <strong>{username}</strong></span>
           <LogoutButton />

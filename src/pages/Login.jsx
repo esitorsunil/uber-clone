@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { users } from '../utils/user'; // Assume this has your user array
+import { users } from '../utils/user'; 
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -24,7 +24,7 @@ const Login = () => {
 
       if (user) {
         localStorage.setItem('user', JSON.stringify(user));
-        window.dispatchEvent(new Event('user-changed')); // 👈 notify navbar
+        window.dispatchEvent(new Event('user-changed'));
 
         if (user.role === 'admin') {
           navigate('/admin');
@@ -80,10 +80,7 @@ const Login = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onKeyDown={handleKeyDown}
-            />
-          
-             
-           
+            />          
           </div>
         </div>
 

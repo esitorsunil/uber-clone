@@ -27,7 +27,7 @@
 
 .scroll-container {
   overflow-x: auto;
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 
 .scroll-container::-webkit-scrollbar {
@@ -40,7 +40,6 @@
   opacity: 1;
 }
 
-/* Chrome, Edge, Safari */
 .scroll-container::-webkit-scrollbar-track {
   background: transparent;
 }
@@ -68,9 +67,8 @@
   }
 }
 
-/* Custom pagination styles */
 .pagination .page-item.active .page-link {
-  background-color: #0d6efd; /* or your primary color */
+  background-color: #0d6efd; 
   border-color: #0d6efd;
   box-shadow: none !important;
   color: white;
@@ -81,3 +79,6 @@
   box-shadow: none !important;
 }
 
+.react-select__menu {
+  z-index: 9999 !important;
+}
