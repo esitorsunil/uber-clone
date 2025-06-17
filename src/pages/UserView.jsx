@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateRide } from '../utils/redux/rideSlice';
-import RideTable from './RideTable';
-import RideMapView from './RideMapView';
+import RideTable from '../components/RideTable';
+import RideMapView from '../components/RideMapView';
 
 const UserView = () => {
   const dispatch = useDispatch();

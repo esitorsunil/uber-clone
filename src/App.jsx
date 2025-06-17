@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import UberNavbar from './components/UberNavbar';
-import Login from './components/Login';
-import AdminView from './components/AdminView';
+import Login from './pages/Login';
+import AdminView from './pages/AdminView';
 import ProtectedRoute from './Route/ProtectedRoute';
-import UserView from './components/UserView';
+import UserView from './pages/UserView';
 
 const App = () => {
   return (

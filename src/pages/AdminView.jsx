@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { users } from '../utils/user';
-import RideDialog from './RideDialogBox';
-import RideMapView from './RideMapView';
+import RideDialog from '../components/RideDialogBox';
+import RideMapView from '../components/RideMapView';
 import { addRide, updateRide, deleteRide } from '../utils/redux/rideSlice';
-import RideTable from './RideTable';
+import RideTable from '../components/RideTable';
 
 const AdminView = ({ isUserView = false }) => {
   const rides = useSelector((state) => state.ride.rides);
