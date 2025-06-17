@@ -11,8 +11,10 @@ const RideTable = ({
   onDelete,
   onView,
 }) => {
-  const [elapsedTimes, setElapsedTimes] = useState({});
   const dispatch = useDispatch();
+  const [elapsedTimes, setElapsedTimes] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const ridesPerPage = 4;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -33,6 +35,15 @@ const RideTable = ({
     return () => clearInterval(interval);
   }, [rides]);
 
+  const onComplete = (ride) => {
+    dispatch(
+      completeRideByUser({
+        rideId: ride.id,
+        username: currentUser.username,
+      })
+    );
+  };
+
   const cellStyle = {
     maxWidth: '250px',
     whiteSpace: 'nowrap',
@@ -48,57 +59,54 @@ const RideTable = ({
     zIndex: 1,
   });
 
-  const onComplete = (ride) => {
-    dispatch(
-      completeRideByUser({
-        rideId: ride.id,
-        username: currentUser.username,
-      })
+  const filteredRides = rides.filter((ride) => {
+    if (!isUserView) return true;
+
+    const currentUserRide = ride.assignedUsers?.find(
+      (u) => u.username === currentUser?.username
     );
-  };
+
+    if (currentUserRide) {
+      return currentUserRide.status !== 'completed';
+    }
+
+    const someoneAccepted = ride.assignedUsers?.some(
+      (u) => u.status === 'ongoing' || u.status === 'completed'
+    );
+    return !someoneAccepted;
+  });
+
+  const indexOfLastRide = currentPage * ridesPerPage;
+  const indexOfFirstRide = indexOfLastRide - ridesPerPage;
+  const currentRides = filteredRides.slice(indexOfFirstRide, indexOfLastRide);
+  const totalPages = Math.ceil(filteredRides.length / ridesPerPage);
+
+  
 
   return (
-    <div className="scroll-container" style={{ overflowX: 'auto' }}>
-      <table className="table align-middle table-hover mt-3" style={{ minWidth: '2000px' }}>
-        <thead className="bg-light">
-          <tr className="align-middle border-bottom text-secondary">
-            <th style={{ ...stickyStyle(0), width: '150px' }} className="py-3 px-3">Ride ID</th>
-            <th style={{ ...stickyStyle(150), width: '300px' }} className="py-3 px-3">Pickup</th>
-            <th className="py-3 px-3">Drop</th>
-            <th className="py-3 px-3">Distance (km)</th>
-            <th className="py-3 px-3">Fare</th>
-            <th className="py-3 px-3">Assigned To</th>
-            <th className="py-3 px-3">Status</th>
-            <th className="py-3 px-3">Start Date</th>
-            <th className="py-3 px-3">Start Time</th>
-            <th className="py-3 px-3">End Date</th>
-            <th className="py-3 px-3">End Time</th>
-            <th className="py-3 px-3">Timer</th>
-            <th className="py-3 px-3">View</th>
-            <th className="py-3 px-3 text-end">{isUserView ? 'Action' : 'Actions'}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rides
-            .filter((ride) => {
-              if (!isUserView) return true;
-
-              const currentUserRide = ride.assignedUsers?.find(
-                (u) => u.username === currentUser?.username
-              );
-
-              // If this user is assigned and the ride is not completed → show
-              if (currentUserRide) {
-                return currentUserRide.status !== 'completed';
-              }
-
-              // If someone else has accepted or completed → don't show
-              const someoneAccepted = ride.assignedUsers?.some(
-                (u) => u.status === 'ongoing' || u.status === 'completed'
-              );
-              return !someoneAccepted;
-            })
-            .map((ride) => {
+    <>
+      <div className="scroll-container" style={{ overflowX: 'auto' }}>
+        <table className="table align-middle table-hover mt-3" style={{ minWidth: '2000px' }}>
+          <thead className="bg-light">
+            <tr className="align-middle border-bottom text-secondary">
+              <th style={{ ...stickyStyle(0), width: '150px' }} className="py-3 px-3">Ride ID</th>
+              <th className="py-3 px-3">Pickup</th>
+              <th className="py-3 px-3">Drop</th>
+              <th className="py-3 px-3">Distance (km)</th>
+              <th className="py-3 px-3">Fare</th>
+              <th className="py-3 px-3">Assigned To</th>
+              <th className="py-3 px-3">Status</th>
+              <th className="py-3 px-3">Start Date</th>
+              <th className="py-3 px-3">Start Time</th>
+              <th className="py-3 px-3">End Date</th>
+              <th className="py-3 px-3">End Time</th>
+              <th className="py-3 px-3">Timer</th>
+              <th className="py-3 px-3">View</th>
+              <th className="py-3 px-3 text-end">{isUserView ? 'Action' : 'Actions'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentRides.map((ride) => {
               const employeeStatus = ride.assignedUsers?.find(
                 (u) => u.username === currentUser?.username
               );
@@ -131,21 +139,11 @@ const RideTable = ({
 
               return (
                 <tr key={ride.id} className="border-bottom">
-                  <td style={stickyStyle(0)} className="py-3 px-3" title={ride.id}>
-                    {ride.id}
-                  </td>
-                  <td
-                    style={stickyStyle(150)}
-                    className="py-3 px-3"
-                    title={ride.pickup?.address || 'None'}
-                  >
+                  <td style={stickyStyle(0)} className="py-3 px-3" title={ride.id}>{ride.id}</td>
+                  <td style={cellStyle} className="py-3 px-3" title={ride.pickup?.address || 'None'}>
                     {ride.pickup?.address || 'None'}
                   </td>
-                  <td
-                    style={cellStyle}
-                    className="py-3 px-3"
-                    title={ride.drop?.address || 'None'}
-                  >
+                  <td style={cellStyle} className="py-3 px-3" title={ride.drop?.address || 'None'}>
                     {ride.drop?.address || 'None'}
                   </td>
                   <td className="py-3 px-3">{ride.distance || 'None'}</td>
@@ -168,34 +166,22 @@ const RideTable = ({
                   <td className="py-3 px-3 text-end">
                     {!isUserView ? (
                       <>
-                        <button
-                          className="btn btn-sm btn-outline-primary me-2"
-                          onClick={() => onEdit?.(ride)}
-                        >
+                        <button className="btn btn-sm btn-outline-primary me-2" onClick={() => onEdit?.(ride)}>
                           <i className="bi bi-pencil-square"></i> Edit
                         </button>
-                        <button
-                          className="btn btn-sm btn-outline-danger"
-                          onClick={() => onDelete?.(ride.id)}
-                        >
+                        <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete?.(ride.id)}>
                           <i className="bi bi-trash"></i> Delete
                         </button>
                       </>
                     ) : (
                       <>
                         {canAccept && (
-                          <button
-                            className="btn btn-sm btn-success me-2"
-                            onClick={() => onAccept?.(ride)}
-                          >
+                          <button className="btn btn-sm btn-success me-2" onClick={() => onAccept?.(ride)}>
                             <i className="bi bi-check-circle me-1"></i> Accept
                           </button>
                         )}
                         {employeeStatus?.status === 'ongoing' && (
-                          <button
-                            className="btn btn-sm btn-warning"
-                            onClick={() => onComplete(ride)}
-                          >
+                          <button className="btn btn-sm btn-warning" onClick={() => onComplete(ride)}>
                             <i className="bi bi-flag-fill me-1"></i> Complete
                           </button>
                         )}
@@ -205,9 +191,36 @@ const RideTable = ({
                 </tr>
               );
             })}
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
+      
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-center mt-3">
+          <nav>
+            <ul className="pagination">
+              <li className={`page-item ${currentPage === 1 && 'disabled'}`}>
+                <button className="page-link" onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}>
+                  Previous
+                </button>
+              </li>
+              {[...Array(totalPages)].map((_, idx) => (
+                <li key={idx} className={`page-item ${currentPage === idx + 1 ? 'active' : ''}`}>
+                  <button className="page-link" onClick={() => setCurrentPage(idx + 1)}>
+                    {idx + 1}
+                  </button>
+                </li>
+              ))}
+              <li className={`page-item ${currentPage === totalPages && 'disabled'}`}>
+                <button className="page-link" onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}>
+                  Next
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      )}
+    </>
   );
 };
 

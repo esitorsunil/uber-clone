@@ -1,31 +1,47 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import LogoutButton from './Logout';
 
 const UberNavbar = () => {
-  const currentUser = JSON.parse(localStorage.getItem('user')); 
-  const role = currentUser?.role;
+  const [username, setUsername] = useState('Guest');
+  const [role, setRole] = useState('user');
+
+  const loadUser = () => {
+    const storedUser = JSON.parse(localStorage.getItem('user'));
+    if (storedUser) {
+      setUsername(storedUser.username);
+      setRole(storedUser.role);
+    } else {
+      setUsername('Guest');
+      setRole('user');
+    }
+  };
+
+  useEffect(() => {
+    loadUser();
+    window.addEventListener('user-changed', loadUser);
+    return () => window.removeEventListener('user-changed', loadUser);
+  }, []);
 
   const linkPath = role === 'admin' ? '/admin' : '/user';
-  const displayName = role === 'admin' ? 'Admin' : 'User';
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-black shadow-sm p-2 px-5">
-      <div className="nav w-100 d-flex justify-content-between align-items-center">
-        <div className="d-flex align-items-center gap-4">
-          <Link className="navbar-brand mb-0" to={linkPath}>
-            <img
-              src="https://www.pranathiss.com/static/assets/images/pranathiss-white.webp"
-              alt={`${displayName} Logo`}
-              style={{ height: '40px', objectFit: 'contain' , color: "white" }}
-            />
-          </Link>
-        </div>
+    <nav className="navbar navbar-dark bg-black shadow-sm px-3 py-2">
+      <div className="container-fluid d-flex justify-content-between align-items-center flex-nowrap">
+        {/* Logo */}
+        <Link className="navbar-brand" to={linkPath}>
+          <img
+            src="https://www.pranathiss.com/static/assets/images/pranathiss-white.webp"
+            alt="Company Logo"
+            style={{ height: '35px', objectFit: 'contain' }}
+          />
+        </Link>
 
-        <ul className="navbar-nav">
-          <li className="nav-item">
-            <LogoutButton />
-          </li>
-        </ul>
+        {/* Username & Logout */}
+        <div className="d-flex align-items-center gap-2 text-white small flex-shrink-0">
+          <span className="d-none d-sm-inline">Welcome, <strong>{username}</strong></span>
+          <LogoutButton />
+        </div>
       </div>
     </nav>
   );

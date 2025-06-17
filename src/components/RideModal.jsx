@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import RideMapView from './RideMapView';
 
 const RideModal = ({ ride, onClose }) => {

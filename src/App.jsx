@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import UberNavbar from './components/UberNavbar';
 import Login from './components/Login';
@@ -21,8 +20,7 @@ const App = () => {
       <UserView />
     </ProtectedRoute>
   }
-/>
-        
+/>        
         <Route
           path="/admin"
           element={

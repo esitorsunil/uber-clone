@@ -11,6 +11,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+
 const FitBounds = ({ pickup, drop }) => {
   const map = useMap();
   useEffect(() => {
@@ -33,12 +34,16 @@ const RideDialog = ({ onClose, onSave }) => {
   const [activeField, setActiveField] = useState(null);
   const [distance, setDistance] = useState(null);
   const [routeCoordinates, setRouteCoordinates] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [loadingRoute, setLoadingRoute] = useState(false);
+  const [geoError, setGeoError] = useState('');
 
   const geoapifyKey = '8bcd7116590c479584b6e2d0a68c20c2';
   const orsApiKey = '5b3ce3597851110001cf6248d316723f3f6540ec9d3b4e341a5f563f';
 
   const fetchSuggestions = async (query) => {
     if (!query) return;
+    setLoadingSuggestions(true);
     try {
       const res = await axios.get('https://api.geoapify.com/v1/geocode/autocomplete', {
         params: {
@@ -51,6 +56,8 @@ const RideDialog = ({ onClose, onSave }) => {
       setSuggestions(res.data.results.slice(0, 5));
     } catch (err) {
       console.error('Geoapify autocomplete error:', err);
+    } finally {
+      setLoadingSuggestions(false);
     }
   };
 
@@ -68,14 +75,15 @@ const RideDialog = ({ onClose, onSave }) => {
   };
 
   const handleUseCurrentLocation = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const { latitude, longitude } = position.coords;
+    if (!navigator.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      async ({ coords }) => {
+        setGeoError('');
         try {
           const res = await axios.get('https://api.geoapify.com/v1/geocode/reverse', {
             params: {
-              lat: latitude,
-              lon: longitude,
+              lat: coords.latitude,
+              lon: coords.longitude,
               format: 'json',
               apiKey: geoapifyKey,
             },
@@ -89,16 +97,17 @@ const RideDialog = ({ onClose, onSave }) => {
         } catch (err) {
           console.error('Reverse geocoding error:', err);
         }
-      });
-    }
+      },
+      () => setGeoError('Location permission denied. Please enable it to use this feature.')
+    );
   };
 
   useEffect(() => {
     if (!pickup || !drop) return;
     const fetchORSRoute = async () => {
-      const url = 'https://api.openrouteservice.org/v2/directions/driving-car/geojson';
+      setLoadingRoute(true);
       try {
-        const res = await axios.post(url, {
+        const res = await axios.post('https://api.openrouteservice.org/v2/directions/driving-car/geojson', {
           coordinates: [
             [pickup.lng, pickup.lat],
             [drop.lng, drop.lat],
@@ -115,6 +124,8 @@ const RideDialog = ({ onClose, onSave }) => {
         setRouteCoordinates(coords);
       } catch (err) {
         console.error('ORS Routing API error:', err);
+      } finally {
+        setLoadingRoute(false);
       }
     };
     fetchORSRoute();
@@ -167,32 +178,44 @@ const RideDialog = ({ onClose, onSave }) => {
                     fetchSuggestions(e.target.value);
                   }}
                 />
-                {suggestions.length > 0 && (
-                  <ul className="list-group">
-                    {activeField === 'pickup' && (
-                      <li className="list-group-item text-primary" onClick={handleUseCurrentLocation} style={{ cursor: 'pointer' }}>
-                        📍 Use current location
-                      </li>
-                    )}
-                    {suggestions.map((s, idx) => (
-                      <li
-                        key={idx}
-                        className="list-group-item"
-                        onClick={() => handleSelectLocation(s, activeField)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        {s.formatted}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+
+                {activeField && (loadingSuggestions ? (
+                  <div className="text-center py-2 text-muted">Loading suggestions...</div>
+                ) : (
+                  suggestions.length > 0 && (
+                    <ul className="list-group shadow-sm">
+                      {activeField === 'pickup' && (
+                        <li
+                          className="list-group-item text-primary"
+                          onClick={handleUseCurrentLocation}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          📍 Use current location
+                        </li>
+                      )}
+                      {suggestions.map((s, idx) => (
+                        <li
+                          key={idx}
+                          className="list-group-item"
+                          onClick={() => handleSelectLocation(s, activeField)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {s.formatted}
+                        </li>
+                      ))}
+                    </ul>
+                  )
+                ))}
+                {geoError && <div className="text-danger small mt-2">{geoError}</div>}
+
                 {distance && (
-                  <div className="text-muted mt-2">
+                  <div className="text-muted mt-3">
                     🚗 Distance: <strong>{distance} km</strong><br />
                     💵 Fare: <strong>₹{Math.round(distance * 10)}</strong>
                   </div>
                 )}
               </div>
+
               <div className="col-md-6">
                 <MapContainer
                   center={[17.385044, 78.486671]}
@@ -214,9 +237,23 @@ const RideDialog = ({ onClose, onSave }) => {
               </div>
             </div>
           </div>
+
           <div className="modal-footer">
             <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
-            <button className="btn btn-primary" onClick={handleSubmit} disabled={!pickup || !drop}>Assign Ride</button>
+            <button
+              className="btn btn-primary"
+              onClick={handleSubmit}
+              disabled={!pickup || !drop || loadingRoute}
+            >
+              {loadingRoute ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-2"></span>
+                  Calculating route...
+                </>
+              ) : (
+                'Assign Ride'
+              )}
+            </button>
           </div>
         </div>
       </div>

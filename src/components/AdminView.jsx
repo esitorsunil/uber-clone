@@ -11,7 +11,7 @@ const AdminView = ({ isUserView = false }) => {
   const dispatch = useDispatch();
   const [showDialog, setShowDialog] = useState(false);
   const [editingRide, setEditingRide] = useState(null);
-  const [viewRide, setViewRide] = useState(null); 
+  const [viewRide, setViewRide] = useState(null);
 
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
@@ -41,25 +41,27 @@ const AdminView = ({ isUserView = false }) => {
   };
 
   const handleDelete = (id) => {
-    dispatch(deleteRide(id));
+    if (window.confirm('Are you sure you want to delete this ride?')) {
+      dispatch(deleteRide(id));
+    }
   };
 
   return (
     <div className="container py-4">
       {!isUserView && (
-        <div className="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+        <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
           <h3 className="text-primary fw-bold mb-0">
-            <i className="bi bi-kanban-fill me-2"></i> Admin Ride Management
+            <i className="bi bi-kanban-fill me-2"></i> Admin Ride Dashboard
           </h3>
           <button className="btn btn-success" onClick={handleCreateRide}>
-            <i className="bi bi-plus-circle me-1"></i> Create New Task
+            <i className="bi bi-plus-circle me-1"></i> Create New Ride
           </button>
         </div>
       )}
 
       {rides.length === 0 ? (
         <div className="alert alert-warning text-center">
-          <i className="bi bi-info-circle me-2"></i> No rides created yet.
+          <i className="bi bi-exclamation-triangle me-2"></i> No rides found. Click "Create New Ride" to get started.
         </div>
       ) : (
         <RideTable
@@ -72,6 +74,7 @@ const AdminView = ({ isUserView = false }) => {
         />
       )}
 
+      {/* Ride Dialog Box */}
       {!isUserView && showDialog && (
         <RideDialog
           onClose={() => {
@@ -84,6 +87,7 @@ const AdminView = ({ isUserView = false }) => {
         />
       )}
 
+      {/* Ride Map Modal */}
       {viewRide && (
         <>
           <div className="modal fade show d-block" tabIndex="-1" role="dialog">
@@ -91,12 +95,13 @@ const AdminView = ({ isUserView = false }) => {
               <div className="modal-content">
                 <div className="modal-header">
                   <h5 className="modal-title">
-                    <i className="bi bi-geo-alt-fill me-2"></i> Ride Map View
+                    <i className="bi bi-map-fill me-2 text-primary"></i> Ride Map View
                   </h5>
                   <button
                     type="button"
                     className="btn-close"
                     onClick={() => setViewRide(null)}
+                    aria-label="Close"
                   ></button>
                 </div>
                 <div className="modal-body">
