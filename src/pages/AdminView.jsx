@@ -5,6 +5,7 @@ import RideDialog from '../components/RideDialogBox';
 import RideMapView from '../components/RideMapView';
 import { addRide, updateRide, deleteRide } from '../utils/redux/rideSlice';
 import RideTable from '../components/RideTable';
+import DownloadReports from '../utils/DownloadReports';
 
 const AdminView = ({ isUserView = false }) => {
   const rides = useSelector((state) => state.ride.rides);
@@ -14,6 +15,7 @@ const AdminView = ({ isUserView = false }) => {
   const [viewRide, setViewRide] = useState(null);
 
   const currentUser = JSON.parse(localStorage.getItem('user'));
+   const pdfrides = JSON.parse(localStorage.getItem('adminRides') || '[]');
 
   const handleCreateRide = () => {
     setEditingRide(null);
@@ -51,17 +53,31 @@ const AdminView = ({ isUserView = false }) => {
       {!isUserView && (
         <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
           <h3 className="text-primary fw-bold mb-0">
-            <i className="bi bi-kanban-fill me-2"></i> Admin Ride Dashboard
+            <i className="bi bi-kanban-fill me-2"></i> Admin Dashboard
           </h3>
-          <button className="btn btn-success" onClick={handleCreateRide}>
-            <i className="bi bi-plus-circle me-1"></i> Create New Ride
+          <button
+            className="btn btn-success"
+            onClick={handleCreateRide}
+            title="Create a new ride and assign to an employee"
+          >
+            <i className="bi bi-plus-circle me-1"></i> New Ride
           </button>
+
+           <DownloadReports rides={pdfrides} />
+          
         </div>
       )}
 
       {rides.length === 0 ? (
-        <div className="alert alert-warning text-center">
-          <i className="bi bi-exclamation-triangle me-2"></i> No rides found. Click "Create New Ride" to get started.
+        <div className="text-center my-5">
+          <i className="bi bi-geo-alt-fill text-warning fs-1 mb-3"></i>
+          <h5>No rides available</h5>
+          <p className="text-muted">Start by creating a new ride task and assigning it to an employee.</p>
+          {!isUserView && (
+            <button className="btn btn-outline-primary mt-2" onClick={handleCreateRide}>
+              <i className="bi bi-plus-circle me-1"></i> Create Ride
+            </button>
+          )}
         </div>
       ) : (
         <RideTable
@@ -88,7 +104,7 @@ const AdminView = ({ isUserView = false }) => {
 
       {viewRide && (
         <>
-          <div className="modal fade show d-block" tabIndex="-1" role="dialog">
+          <div className="modal fade show d-block" tabIndex="-1" role="dialog" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
             <div className="modal-dialog modal-lg modal-dialog-centered" role="document">
               <div className="modal-content">
                 <div className="modal-header">

@@ -41,13 +41,19 @@ const RideTable = ({
   }, [rides]);
 
   const onComplete = (ride) => {
-    dispatch(
-      completeRideByUser({
-        rideId: ride.id,
-        username: currentUser.username,
-      })
-    );
-  };
+  const watchId = localStorage.getItem('watchId');
+  if (watchId) {
+    navigator.geolocation.clearWatch(Number(watchId));
+    localStorage.removeItem('watchId');
+  }
+
+  dispatch(
+    completeRideByUser({
+      rideId: ride.id,
+      username: currentUser.username,
+    })
+  );
+};
 
   const cellStyle = {
     maxWidth: '250px',
@@ -189,17 +195,17 @@ const RideTable = ({
                           onClick={() => onView?.(ride)}
                           aria-label="View ride on map"
                         >
-                          <i className="bi bi-geo-alt-fill"></i> View
+                           View
                         </button>
                       </td>
                       <td className="py-3 px-3 text-end d-flex justify-content-end gap-2">
                         {!isUserView ? (
                           <>
                             <button className="btn btn-sm btn-outline-primary" onClick={() => onEdit?.(ride)}>
-                              <i className="bi bi-pencil-square"></i> Edit
+                             Edit
                             </button>
                             <button className="btn btn-sm btn-outline-danger" onClick={() => onDelete?.(ride.id)}>
-                              <i className="bi bi-trash"></i> Delete
+                               Delete
                             </button>
                           </>
                         ) : (
